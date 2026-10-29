@@ -1,1 +1,1069 @@
+<!DOCTYPE html>
+<html lang="id" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E0D12">
+<title>RGK Team | Real-Time Command Center</title>
+<link rel="icon" type="image/png" href="https://cdn-bt4team.pages.dev/img/bt4team.png">
+<link rel="apple-touch-icon" href="https://cdn-bt4team.pages.dev/img/bt4team.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400..800&family=Noto+Sans+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<style>
+:root{
+  --bg:#0E0D12; --s1:#17151D; --s2:#1B1922; --s3:#24212C;
+  --line:#2A2733; --line2:#3A3645;
+  --text:#F5F1EB; --dim:#9D96A6;
+  --violet:#FF7A1A; --blue:#FF8E3C; --cyan:#2DD4BF; --brand-50:rgba(255,122,26,.12);
+  --ok:#34D399; --warn:#FBBF24; --err:#F87171;
+  --grad:linear-gradient(135deg,#FF5A36 0%,#FF7A1A 50%,#FFB020 100%);
+  --on-brand:#1C0E03;
+  --ease:.25s cubic-bezier(.22,1,.36,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --font:'Manrope','Noto Sans Arabic','Noto Sans Devanagari',system-ui,sans-serif;
+  --display:'Bricolage Grotesque','Manrope',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --tab-h:64px;
+  --r-sm:12px; --r:18px; --r-lg:26px;
+  --shadow-lg:0 2px 4px rgba(0,0,0,.3),0 30px 70px -22px rgba(0,0,0,.75);
+  --ring:0 0 0 4px rgba(255,122,26,.22);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hidden;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--violet);outline-offset:2px;border-radius:6px}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+.mono{font-family:var(--mono)}
 
+/* ambient aura + dot grid (from theme) */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:var(--bg)}
+.bg span{position:absolute;border-radius:50%;opacity:.55}
+.bg .a1{width:620px;height:620px;left:-180px;top:-200px;background:radial-gradient(circle,rgba(255,122,26,.20),transparent 65%);animation:drift 30s ease-in-out infinite alternate}
+.bg .a2{width:560px;height:560px;right:-160px;bottom:-200px;background:radial-gradient(circle,rgba(232,121,249,.12),transparent 65%);animation:drift 36s ease-in-out infinite alternate-reverse}
+.bg::after{content:"";position:absolute;inset:0;background:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px) 0 0/22px 22px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+@keyframes drift{to{transform:translate(60px,40px)}}
+
+/* layout */
+.app{display:flex;height:100vh;height:100dvh}
+.shell{flex:1;min-width:0;display:flex;flex-direction:column}
+.content{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:clamp(18px,3vw,32px);padding-bottom:calc(var(--tab-h) + 32px + env(safe-area-inset-bottom))}
+.page{display:none;max-width:1180px;margin:0 auto}
+.page.active{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+
+/* sidebar (desktop) */
+.sidebar{display:none;width:252px;flex-shrink:0;flex-direction:column;padding:22px 14px;border-inline-end:1px solid var(--line);background:rgba(23,21,29,.86);backdrop-filter:blur(18px)}
+.brand{display:flex;align-items:center;gap:12px;padding:0 8px;margin-bottom:28px}
+.logo{width:40px;height:40px;border-radius:12px;background:#fff;display:grid;place-items:center;font-size:17px;flex-shrink:0;overflow:hidden;box-shadow:0 8px 20px -8px rgba(28,14,3,.45)}
+.logo img{width:100%;height:100%;object-fit:cover;display:block}
+.brand b{display:block;font-family:var(--display);font-size:17px;font-weight:800;letter-spacing:-.02em}
+.brand small{display:block;font-family:var(--mono);color:var(--dim);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.nav{display:flex;flex-direction:column;gap:4px;flex:1}
+.nav-item{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:12px;color:var(--dim);font-weight:600;font-size:14px;text-align:start;border:1px solid transparent;transition:var(--ease);position:relative}
+.nav-item i{width:20px;text-align:center;font-size:15px}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.nav-item.active{color:var(--text);background:var(--brand-50,rgba(255,122,26,.12));border-color:rgba(255,122,26,.35)}
+.nav-item.active i{color:var(--violet)}
+.side-foot{display:flex;align-items:center;gap:10px;padding:14px 10px 0;border-top:1px solid var(--line);color:var(--dim);font-size:12.5px}
+.side-foot b{margin-inline-start:auto;font-size:12.5px;color:var(--ok)}
+
+/* topbar */
+.topbar{display:flex;align-items:center;gap:10px;padding:10px clamp(14px,3vw,32px);padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:rgba(14,13,18,.82);backdrop-filter:blur(16px);flex-shrink:0}
+.brand-m{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:16px;min-width:0}
+.brand-m .logo{width:34px;height:34px;border-radius:10px;font-size:14px}
+.crumb{display:none;align-items:center;gap:8px;color:var(--dim);font-weight:600;font-size:13px}
+.crumb b{color:var(--text)}
+.top-right{margin-inline-start:auto;display:flex;align-items:center;gap:8px}
+.pill{display:flex;align-items:center;gap:8px;height:38px;padding:0 13px;border-radius:99px;border:1px solid var(--line);background:var(--s1);font-size:12px;font-weight:700}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(52,211,153,.6);animation:ping 2s infinite;flex-shrink:0}
+.pill.off .dot{background:var(--err);animation:none}
+@keyframes ping{70%{box-shadow:0 0 0 7px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.lang{height:38px;padding:0 8px;border-radius:12px;border:1px solid var(--line);background:var(--s1);font-size:12.5px;font-weight:600;outline:none;max-width:112px;transition:var(--ease)}
+.lang:hover,.lang:focus{border-color:var(--violet);box-shadow:var(--ring)}
+.lang option{background:var(--s1);color:var(--text)}
+
+/* tabbar (mobile) */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px;padding-bottom:max(6px,env(safe-area-inset-bottom));min-height:var(--tab-h);background:rgba(14,13,18,.92);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 2px;border-radius:12px;color:var(--dim);font-size:10.5px;font-weight:600;transition:var(--ease);min-width:0}
+.tab i{font-size:17px}
+.tab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab.active{color:var(--text);background:rgba(255,122,26,.16)}
+.tab.active i{color:var(--violet)}
+
+@media(min-width:900px){
+  .sidebar{display:flex}.tabbar{display:none}.brand-m{display:none}.crumb{display:flex}
+  .content{padding-bottom:40px}
+}
+
+/* common */
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.page-title{font-family:var(--display);font-size:clamp(23px,3.6vw,30px);font-weight:800;letter-spacing:-.04em}
+.page-sub{color:var(--dim);margin-top:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:40px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--s2);font-weight:700;font-size:13px;transition:var(--ease);white-space:nowrap}
+.btn:hover{border-color:var(--line2);background:var(--s3);transform:translateY(-1px)}
+.btn:disabled{opacity:.55;pointer-events:none}
+.btn.primary{background:var(--grad);border-color:transparent;color:var(--on-brand);box-shadow:0 8px 22px -10px rgba(255,122,26,.6)}
+.btn.primary:hover{box-shadow:0 12px 26px -10px rgba(255,122,26,.7)}
+.btn.danger{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#fecaca}
+.btn.danger:hover{background:rgba(248,113,113,.25)}
+.btn.on{background:rgba(255,122,26,.16);border-color:rgba(255,122,26,.4);color:var(--text)}
+.spin{animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+.glow{position:relative;background:var(--s1);border:1px solid var(--line);border-radius:var(--r);transition:border-color var(--ease),transform var(--ease);box-shadow:0 1px 0 rgba(255,255,255,.03) inset}
+.glow:hover{border-color:var(--line2);background-image:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),rgba(255,122,26,.13),transparent 60%)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.stat{padding:20px}
+.stat-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.stat-icon{width:38px;height:38px;border-radius:11px;background:rgba(255,122,26,.14);color:var(--violet);display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.stat-label{color:var(--dim);font-weight:600;font-size:13px}
+.stat-val{font-family:var(--mono);font-size:clamp(26px,3vw,32px);font-weight:700;letter-spacing:-.5px;word-break:break-all;direction:ltr;text-align:start}
+.stat-foot{margin-top:8px;color:var(--cyan);font-size:12.5px;font-weight:600}
+
+.dist{margin-top:14px;padding:20px}
+.dist h3{font-size:14px;font-weight:700;margin-bottom:14px}
+.bar{display:flex;height:10px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.06);gap:2px}
+.bar i{display:block;height:100%;min-width:0;transition:width .6s ease}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px}
+.legend span{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:12.5px;font-weight:600}
+.legend b{color:var(--text);font-family:var(--mono)}
+.legend em{width:9px;height:9px;border-radius:3px;display:block}
+.c-match{background:var(--cyan)}.c-online{background:var(--ok)}.c-paused{background:#6C6677}.c-error{background:var(--warn)}
+
+/* controls */
+.controls{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.search{flex:1;min-width:220px;position:relative}
+.search i{position:absolute;inset-inline-start:14px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+.search input{width:100%;height:42px;padding:0 14px;padding-inline-start:40px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--s1);outline:none;transition:var(--ease)}
+.search input:focus{border-color:var(--violet);box-shadow:var(--ring)}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--s1);border:1px solid var(--line);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;color:var(--dim);font-size:12.5px;font-weight:700;white-space:nowrap;transition:var(--ease)}
+.seg button:hover{color:var(--text)}
+.seg button.active{color:var(--on-brand);background:var(--grad);box-shadow:0 6px 16px -6px rgba(255,122,26,.55)}
+.seg .n{font-style:normal;font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.1)}
+
+/* nodes */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:14px}
+.node{padding:18px;overflow:hidden}
+.node:hover{transform:translateY(-2px)}
+.node-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.who{display:flex;align-items:center;gap:13px;min-width:0}
+.ava{position:relative;width:58px;height:58px;flex-shrink:0;display:grid;place-items:center}
+.ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,#FF5A36,var(--violet),#FFB020 calc(var(--p,0)*1%),rgba(255,255,255,.09) 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px))}
+.ava-in{width:46px;height:46px;border-radius:50%;background:var(--s3);display:grid;place-items:center;color:var(--violet);font-size:18px}
+.lvl{position:absolute;inset-inline-end:-6px;bottom:-4px;padding:1px 6px;border-radius:7px;font-size:10px;font-weight:800;font-family:var(--mono);background:var(--grad);color:var(--on-brand);border:2px solid var(--s1)}
+.who-t{min-width:0}
+.name{display:flex;align-items:center;gap:8px;min-width:0;font-weight:700;font-size:15px}
+.nick{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.region{padding:1px 7px;border-radius:6px;font-size:10px;font-weight:800;color:#FFB020;background:rgba(255,122,26,.16);border:1px solid rgba(255,122,26,.3);flex-shrink:0}
+.uid{display:flex;align-items:center;gap:6px;margin-top:2px;color:var(--dim);font-family:var(--mono);font-size:11.5px;direction:ltr}
+.mini{width:24px;height:24px;border-radius:7px;color:var(--dim);display:grid;place-items:center;font-size:11px;transition:var(--ease)}
+.mini:hover{color:var(--text);background:rgba(255,255,255,.1)}
+.badge{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px;font-size:11px;font-weight:800;border:1px solid;flex-shrink:0;white-space:nowrap}
+.s-online{color:var(--ok);background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3)}
+.s-match{color:var(--cyan);background:rgba(45,212,191,.1);border-color:rgba(45,212,191,.4)}
+.s-search{color:#FFB020;background:rgba(255,122,26,.12);border-color:rgba(255,122,26,.35)}
+.s-paused{color:var(--dim);background:rgba(156,150,166,.1);border-color:rgba(156,150,166,.3)}
+.s-error{color:var(--warn);background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3)}
+.s-match i{animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.35}}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.metric{padding:10px;border-radius:11px;background:rgba(255,255,255,.035);border:1px solid var(--line);min-width:0}
+.metric span{display:block;color:var(--dim);font-size:11px;font-weight:600;margin-bottom:2px}
+.metric strong{display:block;font-family:var(--mono);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;direction:ltr;text-align:start}
+.metric.gain strong{color:var(--ok)}
+.prog-top,.prog-bot{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--dim);font-weight:600}
+.prog-top span:first-child,.prog-top span:last-child{font-family:var(--mono);direction:ltr}
+.prog-bot{margin-top:6px;font-family:var(--mono);direction:ltr}
+.pct{color:var(--violet);font-weight:700}
+.track{height:7px;margin:7px 0 0;background:rgba(255,255,255,.07);border-radius:9px;overflow:hidden}
+.fill{height:100%;border-radius:9px;background:var(--grad);transition:width .8s ease}
+.node-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.time{display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:12px;font-family:var(--mono);direction:ltr}
+.acts{display:flex;gap:6px}
+.act{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--dim);display:grid;place-items:center;font-size:13px;transition:var(--ease)}
+.act:hover{color:var(--text);border-color:var(--violet);background:rgba(255,122,26,.15)}
+.act.danger:hover{color:var(--err);border-color:var(--err);background:rgba(248,113,113,.1)}
+.act:disabled{opacity:.5;pointer-events:none}
+.empty{grid-column:1/-1;text-align:center;padding:56px 16px;color:var(--dim)}
+.empty i.big{display:block;font-size:30px;margin-bottom:14px;color:var(--violet)}
+.empty .btn{margin-top:18px}
+
+/* terminal */
+.term{display:flex;flex-direction:column;height:clamp(340px,calc(100dvh - 330px),760px);border-radius:var(--r);border:1px solid var(--line);background:#0A090E;overflow:hidden}
+.term-head{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);background:var(--s1);font-family:var(--mono);font-size:12px;color:var(--violet);direction:ltr}
+.term-head .dots{display:flex;gap:6px}
+.term-head .dots i{width:9px;height:9px;border-radius:50%;background:#f87171}
+.term-head .dots i:nth-child(2){background:#fbbf24}.term-head .dots i:nth-child(3){background:#34d399}
+.term-head .cnt{margin-inline-start:auto;color:var(--dim)}
+.term-body{flex:1;overflow-y:auto;padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:1.7;color:#D3CDD6;direction:ltr;text-align:left}
+.log{display:flex;gap:10px;padding:1px 6px;border-radius:6px;word-break:break-word}
+.log:hover{background:rgba(255,255,255,.04)}
+.log-ts{color:var(--violet);flex-shrink:0}
+.log-msg.success{color:var(--ok)}.log-msg.warning{color:var(--warn)}.log-msg.error{color:var(--err)}
+.term-empty{color:var(--dim);padding:20px 6px}
+
+/* profile */
+.hero{overflow:hidden;margin-bottom:14px}
+.hero-banner{height:104px;background:radial-gradient(500px 160px at 85% 0%,rgba(255,176,32,.35),transparent 70%),var(--grad)}
+.hero-body{display:flex;align-items:flex-end;gap:18px;padding:0 22px 20px;margin-top:-40px;flex-wrap:wrap}
+.hero-avatar{width:88px;height:88px;border-radius:24px;background:#fff;border:4px solid var(--s1);display:grid;place-items:center;overflow:hidden;box-shadow:0 12px 30px -10px rgba(255,122,26,.55);flex-shrink:0}
+.hero-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-name{font-family:var(--display);font-size:clamp(22px,4vw,28px);font-weight:800;letter-spacing:-.04em}
+.hero-tag{color:var(--dim);font-size:13.5px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-inline-start:auto}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid rgba(255,122,26,.35);background:rgba(255,122,26,.12)}
+.chip i{color:var(--violet)}
+.info{margin-top:14px;padding:4px 22px}
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.info-row:last-child{border:0}
+.info-row span{color:var(--dim)}
+.info-row b{font-weight:700;text-align:end}
+@media(max-width:600px){.chips{margin-inline-start:0}.hero-body{padding:0 18px 18px}}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,7,12,.78);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity var(--ease),visibility var(--ease)}
+.modal.active{opacity:1;visibility:visible}
+.sheet{position:relative;width:100%;max-width:440px;max-height:92dvh;overflow-y:auto;background:var(--s1);border:1px solid var(--line2);border-radius:var(--r-lg);padding:26px;transform:translateY(24px) scale(.97);transition:transform var(--ease);box-shadow:var(--shadow-lg)}
+.sheet::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--grad)}
+.modal.active .sheet{transform:none}
+.sheet h2{font-family:var(--display);font-size:21px;font-weight:800;margin-bottom:6px;letter-spacing:-.03em}
+.sheet>p,.sheet form>p{color:var(--dim);margin-bottom:20px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--violet);margin-bottom:7px}
+.field input,.field select,.field textarea{width:100%;padding:12px 13px;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--line);outline:none;font-size:14px;transition:var(--ease)}
+.field textarea{min-height:110px;resize:vertical;font-family:var(--mono);font-size:12.5px}
+.field select option{background:var(--s1)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--violet);box-shadow:var(--ring)}
+.card-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+@media(max-width:600px){
+  .modal{align-items:flex-end;padding:0}
+  .sheet{max-width:none;border-radius:22px 22px 0 0;padding-bottom:max(26px,env(safe-area-inset-bottom));transform:translateY(40px)}
+}
+
+/* toast */
+.toasts{position:fixed;inset-inline:16px;bottom:16px;z-index:200;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
+.toast{max-width:min(420px,100%);display:flex;align-items:center;gap:11px;padding:12px 16px;border-radius:13px;font-weight:600;font-size:13px;background:rgba(23,21,29,.97);border:1px solid var(--line2);border-inline-start:4px solid var(--violet);box-shadow:0 12px 32px rgba(0,0,0,.5);pointer-events:auto;animation:tin .3s var(--ease) both}
+.toast.success{border-inline-start-color:var(--ok)}.toast.error{border-inline-start-color:var(--err)}
+.toast.hide{opacity:0;transform:translateY(8px);transition:.3s}
+@keyframes tin{from{opacity:0;transform:translateY(12px)}}
+[dir=rtl] .toasts{align-items:flex-start}
+@media(max-width:899px){.toasts{bottom:calc(var(--tab-h) + 14px + env(safe-area-inset-bottom))}}
+
+@media(max-width:600px){
+  .pill span{display:none}.pill{width:38px;padding:0;justify-content:center}
+  .lang{max-width:88px}
+  .metrics{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:1/-1}
+  .page-head .row,.page-head .row .btn{width:100%}
+  .page-head .row .btn{flex:1}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><span class="a1"></span><span class="a2"></span></div>
+
+<div class="app">
+  <aside class="sidebar" aria-label="Menu utama">
+    <div class="brand">
+      <div class="logo"><img src="https://cdn-bt4team.pages.dev/img/bt4team.png" alt="" width="40" height="40"></div>
+      <div><b>RGK Team</b><small data-i="Real-Time Command Center">Real-Time Command Center</small></div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-page="core" data-title="Command Core"><i class="fa-solid fa-gauge-high"></i><span data-i="Command Core">Command Core</span></button>
+      <button class="nav-item" data-page="targets" data-title="Target Nodes"><i class="fa-solid fa-network-wired"></i><span data-i="Target Nodes">Target Nodes</span></button>
+      <button class="nav-item" data-page="terminal" data-title="Uplink Terminal"><i class="fa-solid fa-terminal"></i><span data-i="Uplink Terminal">Uplink Terminal</span></button>
+      <button class="nav-item" data-page="profile" data-title="Profil Tim"><i class="fa-solid fa-id-badge"></i><span data-i="Profil Tim">Profil Tim</span></button>
+    </nav>
+    <div class="side-foot"><span data-i="Status mesin">Status mesin</span><b id="sideStatus">ONLINE</b></div>
+  </aside>
+
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand-m"><div class="logo"><img src="https://cdn-bt4team.pages.dev/img/bt4team.png" alt="" width="34" height="34"></div><span>RGK Team</span></div>
+      <div class="crumb"><span>Command Center</span><i class="fa-solid fa-chevron-right" style="font-size:10px"></i><b id="topTitle" data-i="Command Core">Command Core</b></div>
+      <div class="top-right">
+        <div class="pill" id="pill"><i class="dot"></i><span id="pillText">ONLINE</span></div>
+        <select class="lang" id="lang" aria-label="Language">
+          <option value="id">Indonesia</option><option value="en">English</option><option value="ar">العربية</option><option value="hi">हिन्दी</option><option value="ne">नेपाली</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="content" id="content">
+
+      <!-- CORE -->
+      <section id="page-core" class="page active">
+        <div class="page-head">
+          <div><h1 class="page-title" data-i="Command Core">Command Core</h1><p class="page-sub" data-i="Analitik sistem secara real-time">Analitik sistem secara real-time</p></div>
+          <button class="btn primary" id="syncBtn"><i class="fa-solid fa-rotate" id="syncIcon"></i><span data-i="Sinkronkan">Sinkronkan</span></button>
+        </div>
+        <div class="stats">
+          <div class="stat glow"><div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-diagram-project"></i></div><div class="stat-label" data-i="Total node terhubung">Total node terhubung</div></div><div class="stat-val" id="stat-accounts">0</div><div class="stat-foot" id="stat-online">0 Online</div></div>
+          <div class="stat glow"><div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-bolt"></i></div><div class="stat-label" data-i="Eksekusi dimulai">Eksekusi dimulai</div></div><div class="stat-val" id="stat-started">0</div><div class="stat-foot" id="stat-per-hour">~0 / jam</div></div>
+          <div class="stat glow"><div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-fire-flame-curved"></i></div><div class="stat-label" data-i="Total EXP terkumpul">Total EXP terkumpul</div></div><div class="stat-val" id="stat-exp">+0</div><div class="stat-foot" id="stat-exp-rate">~0 EXP/jam</div></div>
+          <div class="stat glow"><div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-clock"></i></div><div class="stat-label" data-i="Uptime sistem">Uptime sistem</div></div><div class="stat-val" id="stat-uptime">00:00:00</div><div class="stat-foot" id="stat-active-matches">0 Aktif</div></div>
+        </div>
+        <div class="dist glow">
+          <h3 data-i="Distribusi node">Distribusi node</h3>
+          <div class="bar" id="distBar"></div>
+          <div class="legend">
+            <span><em class="c-match"></em><span data-i="Match">Match</span><b id="d-match">0</b></span>
+            <span><em class="c-online"></em><span data-i="Online">Online</span><b id="d-online">0</b></span>
+            <span><em class="c-paused"></em><span data-i="Paused">Paused</span><b id="d-paused">0</b></span>
+            <span><em class="c-error"></em><span data-i="Error">Error</span><b id="d-error">0</b></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TARGETS -->
+      <section id="page-targets" class="page">
+        <div class="page-head">
+          <div><h1 class="page-title" data-i="Target Nodes">Target Nodes</h1><p class="page-sub" data-i="Kelola akun yang terhubung">Kelola akun yang terhubung</p></div>
+          <div class="row">
+            <button class="btn" id="btnPauseAll"><i class="fa-solid fa-pause"></i><span>Pause All</span></button>
+            <button class="btn primary" id="btnAdd"><i class="fa-solid fa-plus"></i><span data-i="Inject Node">Inject Node</span></button>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="search"><i class="fa-solid fa-magnifying-glass"></i><input id="accountSearch" type="search" data-ph="Cari UID atau nickname..." placeholder="Cari UID atau nickname..." autocomplete="off"></div>
+          <div class="seg" id="nodeFilters">
+            <button class="active" data-f="all"><span data-i="Semua">Semua</span><em class="n" id="f-all">0</em></button>
+            <button data-f="in_match"><span data-i="Match">Match</span><em class="n" id="f-in_match">0</em></button>
+            <button data-f="online"><span data-i="Online">Online</span><em class="n" id="f-online">0</em></button>
+            <button data-f="paused"><span data-i="Paused">Paused</span><em class="n" id="f-paused">0</em></button>
+          </div>
+        </div>
+        <div class="grid" id="accounts"><div class="empty" id="connecting"><i class="fa-solid fa-circle-notch fa-spin big"></i><span data-i="Menghubungkan ke backend...">Menghubungkan ke backend...</span></div></div>
+        <div class="empty" id="noMatch" hidden><i class="fa-solid fa-filter-circle-xmark big"></i><span data-i="Tidak ada node yang cocok.">Tidak ada node yang cocok.</span></div>
+      </section>
+
+      <!-- TERMINAL -->
+      <section id="page-terminal" class="page">
+        <div class="page-head">
+          <div><h1 class="page-title" data-i="Uplink Terminal">Uplink Terminal</h1><p class="page-sub" data-i="Log eksekusi backend langsung">Log eksekusi backend langsung</p></div>
+          <div class="row">
+            <button class="btn on" id="btnAutoscroll"><i class="fa-solid fa-arrow-down"></i><span data-i="Auto-scroll">Auto-scroll</span></button>
+            <button class="btn" id="btnClearLogs"><i class="fa-solid fa-trash"></i><span data-i="Hapus log">Hapus log</span></button>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="seg" id="logFilters">
+            <button class="active" data-f="all" data-i="Semua">Semua</button>
+            <button data-f="match" data-i="Match">Match</button>
+            <button data-f="success" data-i="EXP / Sukses">EXP / Sukses</button>
+            <button data-f="error" data-i="Error">Error</button>
+          </div>
+        </div>
+        <div class="term">
+          <div class="term-head"><span class="dots"><i></i><i></i><i></i></span><span>RGK_Team@backend:~#</span><span class="cnt" id="logCount">0</span></div>
+          <div class="term-body" id="console"></div>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section id="page-profile" class="page">
+        <div class="page-head">
+          <div><h1 class="page-title" data-i="Profil Tim">Profil Tim</h1><p class="page-sub" data-i="Identitas dan ringkasan operasional">Identitas dan ringkasan operasional</p></div>
+        </div>
+        <div class="hero glow">
+          <div class="hero-banner"></div>
+          <div class="hero-body">
+            <div class="hero-avatar"><img src="https://cdn-bt4team.pages.dev/img/bt4team.png" alt="" width="88" height="88"></div>
+            <div><div class="hero-name">RGK Team</div><div class="hero-tag" data-i="Real-Time Command Center">Real-Time Command Center</div></div>
+            <div class="chips">
+              <span class="chip"><i class="fa-solid fa-shield-halved"></i><span data-i="Admin">Admin</span></span>
+              <span class="chip"><i class="fa-solid fa-circle-check"></i><span id="p-status">Online</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat glow"><div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-diagram-project"></i></div><div class="stat-label" data-i="Node dikelola">Node dikelola</div></div><div class="stat-val" id="p-nodes">0</div></div>
+          <div class="stat glow"><div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-bolt"></i></div><div class="stat-label" data-i="Eksekusi dimulai">Eksekusi dimulai</div></div><div class="stat-val" id="p-matches">0</div></div>
+          <div class="stat glow"><div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-fire-flame-curved"></i></div><div class="stat-label" data-i="Total EXP terkumpul">Total EXP terkumpul</div></div><div class="stat-val" id="p-exp">+0</div></div>
+          <div class="stat glow"><div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-gauge-high"></i></div><div class="stat-label" data-i="EXP per jam">EXP per jam</div></div><div class="stat-val" id="p-rate">0</div></div>
+        </div>
+        <div class="info glow">
+          <div class="info-row"><span data-i="Nama tim">Nama tim</span><b>RGK Team</b></div>
+          <div class="info-row"><span data-i="Dashboard">Dashboard</span><b data-i="Command Center">Command Center</b></div>
+          <div class="info-row"><span data-i="Peran">Peran</span><b data-i="Administrator">Administrator</b></div>
+          <div class="info-row"><span data-i="Uptime sesi">Uptime sesi</span><b class="mono" id="p-uptime">00:00:00</b></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="Menu utama">
+  <button class="tab active" data-page="core" data-title="Command Core"><i class="fa-solid fa-gauge-high"></i><span data-i="Core">Core</span></button>
+  <button class="tab" data-page="targets" data-title="Target Nodes"><i class="fa-solid fa-network-wired"></i><span data-i="Nodes">Nodes</span></button>
+  <button class="tab" data-page="terminal" data-title="Uplink Terminal"><i class="fa-solid fa-terminal"></i><span data-i="Terminal">Terminal</span></button>
+  <button class="tab" data-page="profile" data-title="Profil Tim"><i class="fa-solid fa-id-badge"></i><span data-i="Profil">Profil</span></button>
+</nav>
+
+<!-- Modal: tambah node -->
+<div class="modal" id="addModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+  <div class="sheet">
+    <h2 id="addTitle" data-i="Inject node baru">Inject node baru</h2>
+    <form id="addForm" novalidate>
+      <p data-i="Masukkan kredensial untuk menjalankan instance baru di server.">Masukkan kredensial untuk menjalankan instance baru di server.</p>
+      <div class="field"><label for="accType" data-i="Tipe autentikasi">Tipe autentikasi</label>
+        <select id="accType">
+          <option value="guest" data-i="Guest (UID / Password)">Guest (UID / Password)</option>
+          <option value="token" data-i="Access Token">Access Token</option>
+        </select></div>
+      <div id="guestInputs">
+        <div class="field"><label for="accUid">UID</label><input type="text" id="accUid" inputmode="numeric" data-ph="Masukkan UID" placeholder="Masukkan UID" autocomplete="off"></div>
+        <div class="field"><label for="accPass" data-i="Password / Key">Password / Key</label><input type="password" id="accPass" placeholder="••••••••••••" autocomplete="new-password"></div>
+      </div>
+      <div id="tokenInputs" hidden><div class="field"><label for="accToken" data-i="Access token">Access token</label><textarea id="accToken" data-ph="Tempel token lengkap di sini..." placeholder="Tempel token lengkap di sini..." autocomplete="off" spellcheck="false"></textarea></div></div>
+      <div class="card-actions">
+        <button type="button" class="btn" data-close="addModal" data-i="Batal">Batal</button>
+        <button type="submit" class="btn primary" id="addSubmit"><i class="fa-solid fa-rocket"></i><span data-i="Deploy node">Deploy node</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: konfirmasi -->
+<div class="modal" id="confirmModal" aria-hidden="true" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="sheet">
+    <h2 id="confirmTitle" data-i="Konfirmasi">Konfirmasi</h2>
+    <p id="confirmMsg" style="margin-bottom:0"></p>
+    <div class="card-actions">
+      <button type="button" class="btn" id="confirmNo" data-i="Batal">Batal</button>
+      <button type="button" class="btn danger" id="confirmYes"><i class="fa-solid fa-trash"></i><span data-i="Hapus">Hapus</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toastBox" aria-live="polite"></div>
+
+<script>
+"use strict";
+const EXP_TABLE = {
+1:0,2:48,3:202,4:544,5:1012,6:1844,7:2792,8:3800,9:4870,10:6004,
+11:7192,12:8448,13:9760,14:11140,15:12566,16:14060,17:15610,18:17224,19:18902,20:20632,
+21:22424,22:24278,23:26192,24:28166,25:30200,26:32294,27:34448,28:37804,29:41274,30:44870,
+31:48582,32:53394,33:58566,34:64096,35:69994,36:76460,37:83506,38:91128,39:99322,40:108092,
+41:120144,42:133266,43:147472,44:162760,45:179126,46:196572,47:215368,48:235516,49:257010,50:279860,
+51:304056,52:348318,53:394982,54:444044,55:495508,56:549364,57:633756,58:721744,59:813336,60:908522,
+61:1041438,62:1180352,63:1325266,64:1476184,65:1634300,66:1840946,67:2056594,68:2281242,69:2514880,70:2757530,
+71:3059506,72:3372284,73:3699456,74:4041030,75:4397002,76:4829104,77:5282204,78:5756304,79:6251408,80:6776502,
+81:7381324,82:8043154,83:8752982,84:9510808,85:10316338,86:11277190,87:12291748,88:13360304,89:14482858,90:15659418,
+91:17026708,92:18453950,93:19941280,94:21488570,95:23095858,96:24763138,97:26490428,98:28378704,99:30124996,100:32032884
+};
+
+const $ = id => document.getElementById(id);
+const state = { accounts:[], logs:[], online:true, loaded:false, serverUptime:null, upAt:Date.now() };
+let activeFilter = "all", activeLogFilter = "all", autoScroll = true, rendering = false;
+const clientStart = Date.now();
+
+/* ================= i18n ================= */
+const LG = ["en","ar","ne","hi"], D = {en:{},ar:{},ne:{},hi:{}};
+const T = [
+["Real-Time Command Center","Real-Time Command Center","مركز القيادة المباشر","रियल-टाइम कमान्ड सेन्टर","रियल-टाइम कमांड सेंटर"],
+["Command Core","Command Core","مركز التحكم","कमान्ड कोर","कमांड कोर"],
+["Target Nodes","Target Nodes","العقد المستهدفة","टार्गेट नोडहरू","टारगेट नोड्स"],
+["Uplink Terminal","Uplink Terminal","طرفية الاتصال","अपलिङ्क टर्मिनल","अपलिंक टर्मिनल"],
+["Profil Tim","Team Profile","ملف الفريق","टोली प्रोफाइल","टीम प्रोफ़ाइल"],
+["Core","Core","التحكم","कोर","कोर"],
+["Nodes","Nodes","العقد","नोडहरू","नोड्स"],
+["Terminal","Terminal","الطرفية","टर्मिनल","टर्मिनल"],
+["Profil","Profile","الملف","प्रोफाइल","प्रोफ़ाइल"],
+["Status mesin","Engine status","حالة المحرك","इन्जिन स्थिति","इंजन स्थिति"],
+["Analitik sistem secara real-time","Real-time system analytics","تحليلات النظام المباشرة","रियल-टाइम प्रणाली विश्लेषण","रियल-टाइम सिस्टम एनालिटिक्स"],
+["Sinkronkan","Sync","مزامنة","सिंक गर्नुहोस्","सिंक करें"],
+["Total node terhubung","Total linked nodes","إجمالي العقد المتصلة","जोडिएका कुल नोडहरू","कुल जुड़े नोड्स"],
+["Eksekusi dimulai","Executions started","عمليات التنفيذ المبدوءة","सुरु गरिएका कार्यान्वयन","शुरू किए गए निष्पादन"],
+["Total EXP terkumpul","Total EXP harvested","إجمالي EXP المجمّع","जम्मा गरिएको कुल EXP","कुल एकत्रित EXP"],
+["Uptime sistem","System uptime","مدة تشغيل النظام","प्रणाली अपटाइम","सिस्टम अपटाइम"],
+["Distribusi node","Node distribution","توزيع العقد","नोड वितरण","नोड वितरण"],
+["Kelola akun yang terhubung","Manage connected accounts","إدارة الحسابات المتصلة","जोडिएका खाताहरू व्यवस्थापन गर्नुहोस्","जुड़े हुए खातों को प्रबंधित करें"],
+["Pause All","Pause All","إيقاف الكل مؤقتًا","सबै रोक्नुहोस्","सभी रोकें"],
+["Resume All","Resume All","استئناف الكل","सबै सुचारु गर्नुहोस्","सभी फिर शुरू करें"],
+["Inject Node","Inject Node","إضافة عقدة","नोड थप्नुहोस्","नोड जोड़ें"],
+["Semua","All","الكل","सबै","सभी"],
+["Match","Match","مباراة","म्याच","मैच"],
+["Online","Online","متصل","अनलाइन","ऑनलाइन"],
+["Paused","Paused","متوقف مؤقتًا","रोकिएको","रुका हुआ"],
+["Menghubungkan ke backend...","Connecting to backend...","جارٍ الاتصال بالخادم...","ब्याकएन्डमा जडान हुँदैछ...","बैकएंड से कनेक्ट हो रहा है..."],
+["Tidak ada node yang cocok.","No matching nodes.","لا توجد عقد مطابقة.","मिल्ने नोड भेटिएन।","कोई मेल खाता नोड नहीं मिला।"],
+["Belum ada log.","No logs yet.","لا توجد سجلات بعد.","अहिलेसम्म कुनै लग छैन।","अभी कोई लॉग नहीं है।"],
+["Log eksekusi backend langsung","Live backend execution logs","سجلات تنفيذ الخادم المباشرة","ब्याकएन्ड कार्यान्वयन लाइभ लग","बैकएंड निष्पादन लॉग लाइव"],
+["Auto-scroll","Auto-scroll","تمرير تلقائي","अटो-स्क्रोल","ऑटो-स्क्रॉल"],
+["Hapus log","Clear logs","مسح السجلات","लग मेटाउनुहोस्","लॉग साफ़ करें"],
+["EXP / Sukses","EXP / Success","EXP / نجاح","EXP / सफल","EXP / सफल"],
+["Error","Error","أخطاء","त्रुटि","त्रुटि"],
+["Identitas dan ringkasan operasional","Identity and operational summary","الهوية وملخص العمليات","पहिचान र सञ्चालन सारांश","पहचान और संचालन सारांश"],
+["Admin","Admin","مشرف","एडमिन","एडमिन"],
+["Node dikelola","Nodes managed","العقد المُدارة","व्यवस्थापित नोडहरू","प्रबंधित नोड्स"],
+["EXP per jam","EXP per hour","EXP في الساعة","प्रति घण्टा EXP","प्रति घंटा EXP"],
+["Nama tim","Team name","اسم الفريق","टोलीको नाम","टीम का नाम"],
+["Dashboard","Dashboard","لوحة التحكم","ड्यासबोर्ड","डैशबोर्ड"],
+["Peran","Role","الدور","भूमिका","भूमिका"],
+["Uptime sesi","Session uptime","مدة الجلسة","सत्र अपटाइम","सत्र अपटाइम"],
+["Command Center","Command Center","مركز القيادة","कमान्ड सेन्टर","कमांड सेंटर"],
+["Administrator","Administrator","مسؤول","प्रशासक","प्रशासक"],
+["Salin","Copy","نسخ","प्रतिलिपि","कॉपी करें"],
+["Konfirmasi","Confirm","تأكيد","पुष्टि गर्नुहोस्","पुष्टि करें"],
+["Inject node baru","Inject new node","إضافة عقدة جديدة","नयाँ नोड थप्नुहोस्","नया नोड जोड़ें"],
+["Masukkan kredensial untuk menjalankan instance baru di server.","Enter credentials to run a new instance on the server.","أدخل بيانات الاعتماد لتشغيل نسخة جديدة على الخادم.","सर्भरमा नयाँ इन्स्ट्यान्स चलाउन क्रेडेन्सियल प्रविष्ट गर्नुहोस्।","सर्वर पर नया इंस्टेंस चलाने के लिए क्रेडेंशियल दर्ज करें।"],
+["Tipe autentikasi","Authentication type","نوع المصادقة","प्रमाणीकरण प्रकार","प्रमाणीकरण प्रकार"],
+["Guest (UID / Password)","Guest (UID / Password)","ضيف (UID / كلمة المرور)","गेस्ट (UID / पासवर्ड)","गेस्ट (UID / पासवर्ड)"],
+["Access Token","Access Token","رمز الوصول","एक्सेस टोकन","एक्सेस टोकन"],
+["Password / Key","Password / Key","كلمة المرور / المفتاح","पासवर्ड / की","पासवर्ड / की"],
+["Access token","Access token","رمز الوصول","एक्सेस टोकन","एक्सेस टोकन"],
+["Batal","Cancel","إلغاء","रद्द गर्नुहोस्","रद्द करें"],
+["Deploy node","Deploy node","تشغيل العقدة","नोड डिप्लोय गर्नुहोस्","नोड डिप्लॉय करें"],
+["Cari UID atau nickname...","Search UID or nickname...","ابحث عن UID أو الاسم...","UID वा उपनाम खोज्नुहोस्...","UID या निकनेम खोजें..."],
+["Masukkan UID","Enter UID","أدخل UID","UID प्रविष्ट गर्नुहोस्","UID दर्ज करें"],
+["Tempel token lengkap di sini...","Paste the full token here...","الصق الرمز كاملًا هنا...","पूरा टोकन यहाँ टाँस्नुहोस्...","पूरा टोकन यहाँ पेस्ट करें..."],
+["ONLINE","ONLINE","متصل","अनलाइन","ऑनलाइन"],
+["OFFLINE","OFFLINE","غير متصل","अफलाइन","ऑफ़लाइन"],
+["Offline","Offline","غير متصل","अफलाइन","ऑफ़लाइन"],
+["PAUSED","PAUSED","متوقف","रोकिएको","रुका हुआ"],
+["IN MATCH","IN MATCH","في مباراة","म्याचमा","मैच में"],
+["SEARCHING","SEARCHING","جارٍ البحث","खोजिँदैछ","खोज रहा है"],
+["Base EXP","Base EXP","EXP الأساسي","आधार EXP","बेस EXP"],
+["Current","Current","الحالي","हालको","वर्तमान"],
+["Harvested","Harvested","المجمّع","संकलित","एकत्रित"],
+["{0} EXP lagi","{0} EXP left","متبقي {0} EXP","{0} EXP बाँकी","{0} EXP शेष"],
+["Level maksimal","Max level","المستوى الأقصى","अधिकतम स्तर","अधिकतम स्तर"],
+["Salin UID","Copy UID","نسخ UID","UID कपी गर्नुहोस्","UID कॉपी करें"],
+["Resume","Resume","استئناف","सुचारु गर्नुहोस्","फिर शुरू करें"],
+["Pause","Pause","إيقاف مؤقت","रोक्नुहोस्","रोकें"],
+["Restart","Restart","إعادة التشغيل","पुनः सुरु गर्नुहोस्","पुनः आरंभ करें"],
+["Sync","Sync","مزامنة","सिंक","सिंक"],
+["Hapus","Delete","حذف","मेटाउनुहोस्","हटाएं"],
+["UID dan password wajib diisi","UID and password are required","UID وكلمة المرور مطلوبان","UID र पासवर्ड आवश्यक छ","UID और पासवर्ड आवश्यक हैं"],
+["Token wajib diisi","Token is required","الرمز مطلوب","टोकन आवश्यक छ","टोकन आवश्यक है"],
+["Node berhasil di-deploy","Node deployed successfully","تم تشغيل العقدة بنجاح","नोड सफलतापूर्वक डिप्लोय भयो","नोड सफलतापूर्वक डिप्लॉय हुआ"],
+["Gagal deploy node","Failed to deploy node","فشل تشغيل العقدة","नोड डिप्लोय गर्न असफल","नोड डिप्लॉय करने में विफल"],
+["Koneksi ke backend gagal","Backend connection failed","فشل الاتصال بالخادم","ब्याकएन्ड जडान असफल","बैकएंड कनेक्शन विफल"],
+["Hapus node {0}? Tindakan ini tidak bisa dibatalkan.","Delete node {0}? This cannot be undone.","حذف العقدة {0}؟ لا يمكن التراجع عن هذا الإجراء.","नोड {0} मेटाउने? यो कार्य पूर्ववत गर्न सकिँदैन।","नोड {0} हटाएं? यह क्रिया पूर्ववत नहीं की जा सकती।"],
+["Node {0} dihapus","Node {0} deleted","تم حذف العقدة {0}","नोड {0} मेटाइयो","नोड {0} हटा दिया गया"],
+["Gagal menghapus","Failed to delete","فشل الحذف","मेटाउन असफल","हटाने में विफल"],
+["Sinkronisasi {0}...","Syncing {0}...","جارٍ مزامنة {0}...","{0} सिंक हुँदैछ...","{0} सिंक हो रहा है..."],
+["Sinkronisasi gagal","Sync failed","فشلت المزامنة","सिंक असफल","सिंक विफल"],
+["Restart proses {0}...","Restarting process {0}...","جارٍ إعادة تشغيل {0}...","{0} प्रक्रिया पुनः सुरु हुँदैछ...","{0} प्रक्रिया पुनः आरंभ हो रही है..."],
+["Restart gagal","Restart failed","فشلت إعادة التشغيل","पुनः सुरु असफल","पुनः आरंभ विफल"],
+["{0} dijeda","{0} paused","تم إيقاف {0} مؤقتًا","{0} रोकियो","{0} रोका गया"],
+["{0} dilanjutkan","{0} resumed","تم استئناف {0}","{0} सुचारु भयो","{0} फिर शुरू हुआ"],
+["Aksi gagal","Action failed","فشل الإجراء","कार्य असफल","क्रिया विफल"],
+["Semua node dijeda","All nodes paused","تم إيقاف كل العقد مؤقتًا","सबै नोड रोकिए","सभी नोड रोके गए"],
+["Semua node berjalan","All nodes running","كل العقد تعمل","सबै नोड चलिरहेका छन्","सभी नोड चल रहे हैं"],
+["Gagal","Failed","فشل","असफल","विफल"],
+["Belum ada node aktif.","No active nodes yet.","لا توجد عقد نشطة بعد.","अहिलेसम्म कुनै सक्रिय नोड छैन।","अभी कोई सक्रिय नोड नहीं है।"],
+["Inject node pertama","Inject your first node","أضف أول عقدة","पहिलो नोड थप्नुहोस्","पहला नोड जोड़ें"],
+["Log server dibersihkan","Server logs cleared","تم مسح سجلات الخادم","सर्भर लग मेटाइयो","सर्वर लॉग साफ़ किए गए"],
+["Gagal menghapus log di backend","Failed to clear logs on backend","فشل مسح السجلات على الخادم","ब्याकएन्डमा लग मेटाउन असफल","बैकएंड पर लॉग साफ़ करने में विफल"],
+["{0} disalin: {1}","{0} copied: {1}","تم نسخ {0}: {1}","{0} कपी गरियो: {1}","{0} कॉपी किया गया: {1}"],
+["{0} Online","{0} online","{0} متصل","{0} अनलाइन","{0} ऑनलाइन"],
+["~{0} / jam","~{0} / hour","~{0} / ساعة","~{0} / घण्टा","~{0} / घंटा"],
+["~{0} EXP/jam","~{0} EXP/hr","~{0} EXP/ساعة","~{0} EXP/घण्टा","~{0} EXP/घंटा"],
+["{0} Aktif","{0} Active","{0} نشط","{0} सक्रिय","{0} सक्रिय"]
+];
+T.forEach(r => LG.forEach((l,i) => D[l][r[0]] = r[i+1]));
+let lang = "id";
+function t(key, ...a){
+  let s = lang === "id" ? key : ((D[lang] && D[lang][key]) ?? key);
+  return String(s).replace(/\{(\d)\}/g, (m,i) => a[i] ?? m);
+}
+function applyLang(l){
+  if(l !== "id" && !D[l]) l = "id";
+  lang = l;
+  try{ localStorage.setItem("lang", l); }catch(e){}
+  document.documentElement.lang = l;
+  document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
+  $("lang").value = l;
+  document.querySelectorAll("[data-i]").forEach(el => { el.innerHTML = t(el.dataset.i); });
+  document.querySelectorAll("[data-ph]").forEach(el => { el.placeholder = t(el.dataset.ph); });
+  document.querySelectorAll("[data-ti]").forEach(el => { el.title = t(el.dataset.ti); el.setAttribute("aria-label", el.title); });
+  setStatus(state.online);
+  renderAll(true);
+}
+$("lang").addEventListener("change", e => applyLang(e.target.value));
+
+/* ================= Navigasi ================= */
+const PAGES = ["core","targets","terminal","profile"];
+function go(page){
+  if(!PAGES.includes(page)) page = "core";
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === "page-" + page));
+  let title = "Command Core";
+  document.querySelectorAll("[data-page]").forEach(b => {
+    const on = b.dataset.page === page;
+    b.classList.toggle("active", on);
+    if(on){ b.setAttribute("aria-current","page"); title = b.dataset.title; } else b.removeAttribute("aria-current");
+  });
+  const tt = $("topTitle"); tt.dataset.i = title; tt.innerHTML = t(title);
+  try{ history.replaceState(null, "", "#" + page); }catch(e){}
+  $("content").scrollTop = 0;
+  if(page === "terminal"){ requestAnimationFrame(() => { if(autoScroll) scrollLogsToEnd(); }); }
+}
+document.querySelectorAll("[data-page]").forEach(b => b.addEventListener("click", () => go(b.dataset.page)));
+window.addEventListener("hashchange", () => go(location.hash.slice(1)));
+
+/* ================= Modal ================= */
+let confirmRes = null, lastFocus = null;
+function openModal(id){
+  const m = $(id); if(!m) return;
+  lastFocus = document.activeElement;
+  m.classList.add("active"); m.setAttribute("aria-hidden","false");
+  setTimeout(() => { const f = m.querySelector("input:not([hidden]),select,textarea,.btn.primary,.btn"); if(f && !(f.closest("[hidden]"))) f.focus({preventScroll:true}); }, 60);
+}
+function closeModal(id){
+  const m = $(id); if(!m || !m.classList.contains("active")) return;
+  m.classList.remove("active"); m.setAttribute("aria-hidden","true");
+  if(id === "confirmModal" && confirmRes){ const r = confirmRes; confirmRes = null; r(false); }
+  if(lastFocus && lastFocus.focus){ try{ lastFocus.focus({preventScroll:true}); }catch(e){} }
+}
+document.querySelectorAll(".modal").forEach(m => m.addEventListener("click", e => { if(e.target === m) closeModal(m.id); }));
+document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => closeModal(b.dataset.close)));
+document.addEventListener("keydown", e => {
+  if(e.key !== "Escape") return;
+  const open = [...document.querySelectorAll(".modal.active")].pop();
+  if(open) closeModal(open.id);
+});
+function confirmDialog(msg){
+  $("confirmMsg").textContent = msg;
+  openModal("confirmModal");
+  return new Promise(res => { confirmRes = res; });
+}
+$("confirmNo").addEventListener("click", () => closeModal("confirmModal"));
+$("confirmYes").addEventListener("click", () => {
+  if(confirmRes){ const r = confirmRes; confirmRes = null; r(true); }
+  closeModal("confirmModal");
+});
+
+/* ================= Toast ================= */
+function toast(message, type = "info"){
+  const box = $("toastBox");
+  while(box.children.length >= 4) box.firstChild.remove();
+  const el = document.createElement("div");
+  el.className = "toast " + type;
+  const ic = type === "success" ? '<i class="fa-solid fa-check" style="color:var(--ok)"></i>'
+           : type === "error" ? '<i class="fa-solid fa-triangle-exclamation" style="color:var(--err)"></i>'
+           : '<i class="fa-solid fa-circle-info" style="color:var(--violet)"></i>';
+  el.innerHTML = ic + "<span>" + esc(t(message)) + "</span>";
+  box.appendChild(el);
+  setTimeout(() => { el.classList.add("hide"); setTimeout(() => el.remove(), 350); }, 3800);
+}
+
+/* ================= API ================= */
+async function post(url, body){
+  const r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body: body ? JSON.stringify(body) : undefined });
+  let d = {};
+  try{ d = await r.json(); }catch(e){}
+  if(!r.ok && !d.error) d.error = "HTTP " + r.status;
+  return d;
+}
+const busy = new Set();
+async function guard(key, fn){
+  if(busy.has(key)) return;
+  busy.add(key);
+  try{ await fn(); } finally { busy.delete(key); }
+}
+
+/* ---- tambah node ---- */
+function toggleFormType(){
+  const g = $("accType").value === "guest";
+  $("guestInputs").hidden = !g; $("tokenInputs").hidden = g;
+}
+$("accType").addEventListener("change", toggleFormType);
+$("btnAdd").addEventListener("click", () => openModal("addModal"));
+$("addForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const type = $("accType").value;
+  let payload;
+  if(type === "guest"){
+    const uid = $("accUid").value.trim(), pass = $("accPass").value.trim();
+    if(!uid || !pass) return toast("UID dan password wajib diisi", "error");
+    payload = { uid, password: pass };
+  } else {
+    const token = $("accToken").value.trim();
+    if(!token) return toast("Token wajib diisi", "error");
+    payload = { token };
+  }
+  const btn = $("addSubmit");
+  await guard("add", async () => {
+    btn.disabled = true;
+    try{
+      const d = await post("/api/account/add", payload);
+      if(d.status === "ok"){
+        closeModal("addModal"); $("addForm").reset(); toggleFormType();
+        toast("Node berhasil di-deploy", "success"); fetchStats();
+      } else toast(d.error || "Gagal deploy node", "error");
+    }catch(err){ toast("Koneksi ke backend gagal", "error"); }
+    finally{ btn.disabled = false; }
+  });
+});
+
+/* ---- aksi node ---- */
+async function deleteAccount(uid, authUid){
+  const ok = await confirmDialog(t("Hapus node {0}? Tindakan ini tidak bisa dibatalkan.", uid));
+  if(!ok) return;
+  await guard("del" + uid, async () => {
+    try{
+      const d = await post("/api/account/delete", { uid, auth_uid: authUid || "" });
+      if(d.status === "ok"){ toast(t("Node {0} dihapus", uid), "success"); const c = document.getElementById("acc-" + uid); if(c) c.remove(); fetchStats(); }
+      else toast(d.error || "Gagal menghapus", "error");
+    }catch(e){ toast("Koneksi ke backend gagal", "error"); }
+  });
+}
+const refreshAcc = uid => guard("ref" + uid, async () => {
+  try{ toast(t("Sinkronisasi {0}...", uid)); const d = await post("/api/account/refresh", { uid }); if(d.error) toast(d.error, "error"); setTimeout(fetchStats, 800); }
+  catch(e){ toast("Sinkronisasi gagal", "error"); }
+});
+const restartAcc = uid => guard("rst" + uid, async () => {
+  try{ toast(t("Restart proses {0}...", uid)); const d = await post("/api/account/restart", { uid }); if(d.error) toast(d.error, "error"); setTimeout(fetchStats, 800); }
+  catch(e){ toast("Restart gagal", "error"); }
+});
+const togglePause = uid => guard("pau" + uid, async () => {
+  try{
+    const d = await post("/api/account/pause", { uid });
+    if(d.status === "ok"){ toast(t(d.is_paused ? "{0} dijeda" : "{0} dilanjutkan", uid), d.is_paused ? "info" : "success"); fetchStats(); }
+    else toast(d.error || "Aksi gagal", "error");
+  }catch(e){ toast("Koneksi ke backend gagal", "error"); }
+});
+$("btnPauseAll").addEventListener("click", () => guard("pauseAll", async () => {
+  try{
+    const d = await post("/api/account/pause_all");
+    if(d.status === "ok"){ toast(d.all_paused ? "Semua node dijeda" : "Semua node berjalan", d.all_paused ? "info" : "success"); fetchStats(); }
+    else toast(d.error || "Gagal", "error");
+  }catch(e){ toast("Koneksi ke backend gagal", "error"); }
+}));
+
+/* ================= Node list ================= */
+function nodeCategory(acc){
+  const paused = Boolean(acc.is_paused || acc.status === "PAUSED");
+  if(paused) return "paused";
+  const s = acc.status || "ONLINE";
+  if(s === "IN_MATCH") return "match";
+  if(s === "ONLINE") return "online";
+  if(s.startsWith("SEARCHING")) return "search";
+  return "error";
+}
+const CAT = {
+  paused:{cls:"s-paused", icon:"fa-pause"},
+  match:{cls:"s-match", icon:"fa-crosshairs"},
+  online:{cls:"s-online", icon:"fa-globe"},
+  search:{cls:"s-search", icon:"fa-magnifying-glass"},
+  error:{cls:"s-error", icon:"fa-triangle-exclamation"}
+};
+function fmtDur(sec){
+  sec = Math.max(0, Math.floor(Number(sec) || 0));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h > 0 ? `${h}h ${String(m).padStart(2,"0")}m` : `${String(m).padStart(2,"0")}m ${String(s).padStart(2,"0")}s`;
+}
+function nodeHTML(acc, uid, c){
+  const { level, nextLvl, isMax, baseExp, curExp, earned, needed, remaining, pct, cat, stText } = c;
+  const info = CAT[cat];
+  return `
+    <div class="node-head">
+      <div class="who">
+        <div class="ava"><div class="ring" style="--p:${pct.toFixed(1)}"></div><div class="ava-in"><i class="fa-solid fa-user-astronaut"></i></div><span class="lvl">L${level}</span></div>
+        <div class="who-t">
+          <div class="name"><span class="nick">${esc(acc.nickname || "Unknown")}</span><span class="region">${esc(acc.region || "BD")}</span></div>
+          <div class="uid"><span>UID ${esc(uid)}</span><button class="mini" data-act="copy" title="${esc(t("Salin UID"))}" aria-label="${esc(t("Salin UID"))}"><i class="fa-regular fa-copy"></i></button></div>
+        </div>
+      </div>
+      <span class="badge ${info.cls}"><i class="fa-solid ${info.icon}"></i>${esc(stText)}</span>
+    </div>
+    <div class="metrics">
+      <div class="metric"><span>${t("Base EXP")}</span><strong>${Number(acc.initial_exp || 0).toLocaleString()}</strong></div>
+      <div class="metric"><span>${t("Current")}</span><strong>${curExp.toLocaleString()}</strong></div>
+      <div class="metric gain"><span>${t("Harvested")}</span><strong>+${Number(acc.gained_exp || 0).toLocaleString()}</strong></div>
+    </div>
+    <div>
+      <div class="prog-top"><span>Lv ${level}</span><span>${isMax ? esc(t("Level maksimal")) : esc(t("{0} EXP lagi", remaining.toLocaleString()))}</span><span>Lv ${nextLvl}</span></div>
+      <div class="track"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div>
+      <div class="prog-bot"><span>${earned.toLocaleString()} / ${needed.toLocaleString()}</span><span class="pct">${pct.toFixed(1)}%</span></div>
+    </div>
+    <div class="node-foot">
+      <span class="time"><i class="fa-solid fa-stopwatch"></i><b class="acc-time">00m 00s</b></span>
+      <div class="acts">
+        <button class="act" data-act="pause" title="${esc(t(cat === "paused" ? "Resume" : "Pause"))}" aria-label="${esc(t(cat === "paused" ? "Resume" : "Pause"))}"><i class="fa-solid ${cat === "paused" ? "fa-play" : "fa-pause"}"></i></button>
+        <button class="act" data-act="restart" title="${esc(t("Restart"))}" aria-label="${esc(t("Restart"))}"><i class="fa-solid fa-rotate-right"></i></button>
+        <button class="act" data-act="sync" title="${esc(t("Sync"))}" aria-label="${esc(t("Sync"))}"><i class="fa-solid fa-arrows-rotate"></i></button>
+        <button class="act danger" data-act="delete" title="${esc(t("Hapus"))}" aria-label="${esc(t("Hapus"))}"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`;
+}
+function renderAccounts(accounts, force){
+  const box = $("accounts");
+  const cats = accounts.map(nodeCategory);
+  const allPaused = accounts.length > 0 && cats.every(c => c === "paused");
+  $("btnPauseAll").innerHTML = allPaused
+    ? `<i class="fa-solid fa-play"></i><span>${t("Resume All")}</span>`
+    : `<i class="fa-solid fa-pause"></i><span>${t("Pause All")}</span>`;
+
+  // hitung filter & distribusi
+  const n = { all:accounts.length, in_match:0, online:0, paused:0, error:0 };
+  cats.forEach(c => {
+    if(c === "match"){ n.in_match++; n.online++; }
+    else if(c === "online" || c === "search") n.online++;
+    else if(c === "paused") n.paused++;
+    else n.error++;
+  });
+  ["all","in_match","online","paused"].forEach(k => $("f-" + k).textContent = n[k]);
+  renderDist(cats);
+
+  const connecting = $("connecting"); if(connecting) connecting.remove();
+  if(accounts.length === 0){
+    box.querySelectorAll(".node").forEach(c => c.remove());
+    if(!box.querySelector(".empty")) box.innerHTML = `<div class="empty"><i class="fa-solid fa-ghost big"></i>${esc(t("Belum ada node aktif."))}<br><button class="btn primary" data-act="add">${esc(t("Inject node pertama"))}</button></div>`;
+    else box.querySelector(".empty").innerHTML = `<i class="fa-solid fa-ghost big"></i>${esc(t("Belum ada node aktif."))}<br><button class="btn primary" data-act="add">${esc(t("Inject node pertama"))}</button>`;
+    $("noMatch").hidden = true;
+    return;
+  }
+  box.querySelectorAll(".empty").forEach(e => e.remove());
+  const uids = new Set(accounts.map(a => String(a.uid)));
+  box.querySelectorAll(".node").forEach(c => { if(!uids.has(c.dataset.uid)) c.remove(); });
+
+  accounts.forEach((acc, i) => {
+    const uid = String(acc.uid), cat = cats[i];
+    const level = Math.min(100, Math.max(1, parseInt(acc.level) || 1)), isMax = level >= 100;
+    const nextLvl = Math.min(100, level + 1);
+    const baseExp = EXP_TABLE[level] ?? 0, targetExp = EXP_TABLE[nextLvl] ?? baseExp + 50000;
+    const needed = Math.max(1, targetExp - baseExp), curExp = Number(acc.current_exp || 0);
+    const earned = Math.max(0, curExp - baseExp), remaining = Math.max(0, targetExp - curExp);
+    const pct = isMax ? 100 : Math.min(100, Math.max(0, earned / needed * 100));
+    const stText = cat === "paused" ? t("PAUSED") : cat === "match" ? `${t("IN MATCH")} (${acc.active_matches || 1})` : cat === "online" ? t("ONLINE") : cat === "search" ? t("SEARCHING") : (acc.status || "ERROR");
+    const c = { level, nextLvl, isMax, baseExp, curExp, earned, needed, remaining, pct, cat, stText };
+
+    let card = document.getElementById("acc-" + uid);
+    if(!card){ card = document.createElement("div"); card.id = "acc-" + uid; card.className = "node glow"; }
+    if(card.parentNode !== box) box.appendChild(card);
+    card.dataset.uid = uid; card.dataset.nick = acc.nickname || "";
+    card.dataset.status = cat; card.dataset.paused = cat === "paused" ? "1" : "0";
+    card.dataset.auth = acc.auth_uid || "";
+
+    const sig = [lang, level, acc.nickname, acc.region, stText, cat, acc.initial_exp, curExp, acc.gained_exp].join("|");
+    if(force || card._sig !== sig){ card.innerHTML = nodeHTML(acc, uid, c); card._sig = sig; }
+    const tm = card.querySelector(".acc-time");
+    if(tm){ tm.dataset.uptime = Math.floor(acc.uptime_seconds || 0); tm.dataset.paused = cat === "paused" ? "1" : "0"; tm.textContent = fmtDur(acc.uptime_seconds || 0); }
+  });
+  filterAccounts();
+}
+function renderDist(cats){
+  const n = { match:0, online:0, paused:0, error:0 };
+  cats.forEach(c => { if(c === "match") n.match++; else if(c === "online" || c === "search") n.online++; else if(c === "paused") n.paused++; else n.error++; });
+  const total = cats.length;
+  ["match","online","paused","error"].forEach(k => $("d-" + k).textContent = n[k]);
+  $("distBar").innerHTML = total
+    ? ["match","online","paused","error"].filter(k => n[k]).map(k => `<i class="c-${k}" style="width:${(n[k] / total * 100).toFixed(2)}%"></i>`).join("")
+    : "";
+}
+$("accounts").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if(!b) return;
+  if(b.dataset.act === "add") return openModal("addModal");
+  const card = b.closest(".node"); if(!card) return;
+  const uid = card.dataset.uid;
+  switch(b.dataset.act){
+    case "pause": togglePause(uid); break;
+    case "restart": restartAcc(uid); break;
+    case "sync": refreshAcc(uid); break;
+    case "delete": deleteAccount(uid, card.dataset.auth); break;
+    case "copy": copyText(uid, "UID"); break;
+  }
+});
+
+/* filter & pencarian */
+function filterAccounts(){
+  const q = ($("accountSearch").value || "").toLowerCase().trim();
+  let shown = 0;
+  const cards = document.querySelectorAll("#accounts .node");
+  cards.forEach(card => {
+    const uid = (card.dataset.uid || "").toLowerCase(), nick = (card.dataset.nick || "").toLowerCase();
+    const st = card.dataset.status, paused = card.dataset.paused === "1";
+    let ok = !q || uid.includes(q) || nick.includes(q);
+    if(activeFilter === "in_match") ok = ok && st === "match";
+    else if(activeFilter === "online") ok = ok && !paused && (st === "online" || st === "match" || st === "search");
+    else if(activeFilter === "paused") ok = ok && paused;
+    card.hidden = !ok;
+    if(ok) shown++;
+  });
+  $("noMatch").hidden = !(cards.length > 0 && shown === 0);
+}
+$("accountSearch").addEventListener("input", filterAccounts);
+$("nodeFilters").addEventListener("click", e => {
+  const b = e.target.closest("button[data-f]"); if(!b) return;
+  activeFilter = b.dataset.f;
+  $("nodeFilters").querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
+  filterAccounts();
+});
+
+/* ================= Terminal ================= */
+function scrollLogsToEnd(){ const s = $("console"); s.scrollTop = s.scrollHeight; }
+function renderLogs(logs){
+  const s = $("console");
+  let list = logs || [];
+  if(activeLogFilter === "match") list = list.filter(l => String(l.message || "").toLowerCase().includes("match"));
+  else if(activeLogFilter === "success") list = list.filter(l => l.level === "success" || String(l.message || "").includes("EXP"));
+  else if(activeLogFilter === "error") list = list.filter(l => l.level === "error" || l.level === "warning");
+  $("logCount").textContent = list.length;
+  const prev = s.scrollTop;
+  rendering = true;
+  s.innerHTML = list.length
+    ? list.slice(-400).map(l => `<div class="log"><span class="log-ts">[${esc(l.time || "00:00:00")}]</span><span class="log-msg ${esc(l.level || "info")}">&gt; ${esc(l.message || "")}</span></div>`).join("")
+    : `<div class="term-empty">${esc(t("Belum ada log."))}</div>`;
+  if(autoScroll) scrollLogsToEnd(); else s.scrollTop = prev;
+  requestAnimationFrame(() => requestAnimationFrame(() => { rendering = false; }));
+}
+$("logFilters").addEventListener("click", e => {
+  const b = e.target.closest("button[data-f]"); if(!b) return;
+  activeLogFilter = b.dataset.f;
+  $("logFilters").querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
+  renderLogs(state.logs);
+});
+$("btnClearLogs").addEventListener("click", () => guard("clearLogs", async () => {
+  try{
+    const r = await fetch("/api/logs/clear", { method:"POST" });
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    state.logs = []; renderLogs([]); toast("Log server dibersihkan", "success");
+  }catch(e){ toast("Gagal menghapus log di backend", "error"); }
+}));
+function styleAutoScroll(){ $("btnAutoscroll").classList.toggle("on", autoScroll); }
+$("btnAutoscroll").addEventListener("click", () => { autoScroll = !autoScroll; styleAutoScroll(); if(autoScroll) scrollLogsToEnd(); });
+$("console").addEventListener("scroll", () => {
+  if(rendering) return;
+  const s = $("console"), atEnd = s.scrollHeight - s.scrollTop - s.clientHeight <= 80;
+  if(autoScroll && !atEnd){ autoScroll = false; styleAutoScroll(); }
+  else if(!autoScroll && atEnd){ autoScroll = true; styleAutoScroll(); }
+});
+
+/* ================= Stats ================= */
+function setStatus(on){
+  state.online = on;
+  $("pillText").textContent = t(on ? "ONLINE" : "OFFLINE");
+  const s2 = $("sideStatus");
+  s2.textContent = t(on ? "ONLINE" : "OFFLINE"); s2.style.color = on ? "var(--ok)" : "var(--err)";
+  $("pill").classList.toggle("off", !on);
+  $("p-status").textContent = t(on ? "Online" : "Offline");
+}
+function renderOverview(d){
+  const accs = state.accounts;
+  setText("stat-accounts", d.total_accounts ?? accs.length);
+  setText("stat-started", d.total_matches_started || 0);
+  setText("stat-exp", "+" + Number(d.total_gained_exp || 0).toLocaleString());
+  $("stat-active-matches").textContent = t("{0} Aktif", d.total_active_matches || 0);
+  $("stat-online").textContent = t("{0} Online", accs.filter(a => !(a.is_paused || a.status === "PAUSED") && (a.status === "ONLINE" || a.status === "IN_MATCH")).length);
+  const upH = Math.max(0.016, (Number(d.uptime) || 60) / 3600);
+  $("stat-per-hour").textContent = t("~{0} / jam", Math.round((d.total_matches_started || 0) / upH));
+  $("stat-exp-rate").textContent = t("~{0} EXP/jam", Number(d.exp_per_hour || 0).toLocaleString());
+  setText("p-nodes", d.total_accounts ?? accs.length);
+  setText("p-matches", d.total_matches_started || 0);
+  setText("p-exp", "+" + Number(d.total_gained_exp || 0).toLocaleString());
+  setText("p-rate", Number(d.exp_per_hour || 0).toLocaleString());
+}
+function renderAll(force){
+  if(!state.loaded) return;
+  renderAccounts(state.accounts, force);
+  renderLogs(state.logs);
+  if(state.last) renderOverview(state.last);
+}
+let inflight = false;
+async function fetchStats(manual){
+  if(inflight) return;
+  inflight = true;
+  const ic = $("syncIcon"); ic.classList.add("spin");
+  try{
+    const r = await fetch("/api/stats", { cache:"no-store" });
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    const d = await r.json();
+    state.accounts = Array.isArray(d.accounts) ? d.accounts : [];
+    state.logs = Array.isArray(d.logs) ? d.logs : [];
+    state.last = d; state.loaded = true;
+    if(Number.isFinite(Number(d.uptime)) && d.uptime !== null && d.uptime !== undefined){ state.serverUptime = Number(d.uptime); state.upAt = Date.now(); }
+    renderAll(false);
+    setStatus(true);
+  }catch(e){
+    console.warn("Backend sync error:", e);
+    if(state.online || manual) toast("Koneksi ke backend gagal", "error");
+    setStatus(false);
+    if(!state.loaded){
+      const c = $("connecting");
+      if(c) c.innerHTML = `<i class="fa-solid fa-plug-circle-xmark big"></i>${esc(t("Koneksi ke backend gagal"))}`;
+    }
+  }finally{
+    inflight = false; setTimeout(() => ic.classList.remove("spin"), 400);
+  }
+}
+$("syncBtn").addEventListener("click", () => fetchStats(true));
+
+/* ================= Utils ================= */
+function copyText(txt, label){
+  const ok = () => toast(t("{0} disalin: {1}", label, txt), "success");
+  const fallback = () => {
+    try{
+      const ta = document.createElement("textarea"); ta.value = txt; ta.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(ta); ta.select(); const done = document.execCommand("copy"); ta.remove();
+      done ? ok() : toast(label + ": " + txt);
+    }catch(e){ toast(label + ": " + txt); }
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fallback);
+  else fallback();
+}
+const COUNT = new Set(["stat-accounts","stat-started","stat-exp","p-nodes","p-matches","p-exp","p-rate"]), tw = {};
+function setText(id, v){
+  const el = $(id); if(!el) return;
+  const str = String(v ?? ""), m = COUNT.has(id) && str.match(/^(\+?)([\d,]+)$/);
+  if(!m){ el.textContent = str; return; }
+  const to = parseInt(m[2].replace(/,/g, ""), 10), from = parseFloat(el.dataset.n || 0);
+  if(from === to){ el.textContent = str; return; }
+  el.dataset.n = to;
+  const t0 = performance.now(); cancelAnimationFrame(tw[id]);
+  const step = now => {
+    const k = Math.min(1, (now - t0) / 700), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = m[1] + Math.round(from + (to - from) * e).toLocaleString();
+    if(k < 1) tw[id] = requestAnimationFrame(step); else el.textContent = str;
+  };
+  tw[id] = requestAnimationFrame(step);
+}
+document.addEventListener("pointermove", e => {
+  const c = e.target.closest && e.target.closest(".glow"); if(!c) return;
+  const r = c.getBoundingClientRect();
+  c.style.setProperty("--mx", (e.clientX - r.left) + "px"); c.style.setProperty("--my", (e.clientY - r.top) + "px");
+}, { passive:true });
+function esc(s){ return s == null ? "" : String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
+
+/* jam: uptime sistem & uptime per node */
+setInterval(() => {
+  const p = n => String(n).padStart(2, "0");
+  const base = state.serverUptime != null ? state.serverUptime + (Date.now() - state.upAt) / 1000 : (Date.now() - clientStart) / 1000;
+  const el = Math.floor(base);
+  const up = `${p(Math.floor(el / 3600))}:${p(Math.floor((el % 3600) / 60))}:${p(el % 60)}`;
+  $("stat-uptime").textContent = up; $("p-uptime").textContent = up;
+  document.querySelectorAll(".acc-time").forEach(u => {
+    if(u.dataset.paused === "1") return;
+    const v = (parseInt(u.dataset.uptime || "0", 10) || 0) + 1;
+    u.dataset.uptime = v; u.textContent = fmtDur(v);
+  });
+}, 1000);
+
+/* ================= Init ================= */
+styleAutoScroll();
+toggleFormType();
+let saved = "id"; try{ saved = localStorage.getItem("lang") || "id"; }catch(e){}
+applyLang(saved);
+go(location.hash.slice(1));
+fetchStats();
+setInterval(() => { if(!document.hidden) fetchStats(); }, 5000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden) fetchStats(); });
+</script>
+</body>
+</html>
